@@ -1,6 +1,6 @@
-# Discord Bot
+# Hechan Bot
 
-My first Discord bot.
+Discord bot with basic features.
 
 Uses Javascript and Node.js.
 
