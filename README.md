@@ -8,6 +8,6 @@ Made by Henry Chan
 
 ## Changelog
 
-Version 1.0.1: Developed basic functionality of bot.
+Version 1.0.1: Added 'no u' response and Heroku deployment.
 
-Version 1.0.0: Initial creation.
+Version 1.0.0: Initial creation, bot is functional.
