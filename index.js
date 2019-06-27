@@ -7,8 +7,13 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
-    if (msg.content === 'ping') {
-        msg.channel.send('pong');
+    // 'ping' interaction
+    if (msg.content.toLowerCase() === 'ping') {
+        msg.channel.send('Pong!');
+    }
+    // 'no u' interaction
+    if (msg.content.toLowerCase() === 'no u') {
+        msg.channel.send('No u');
     }
 });
 
