@@ -35,7 +35,7 @@ client.on('message', msg => {
      * !hechan commands
      */
     if (!msg.content.startsWith(process.env.PREFIX)) { return; }
-    const args = msg.content.slice(PREFIX.length).trim().split(/ + /g);
+    const args = msg.content.slice(process.env.PREFIX.length).trim().split(/ + /g);
     const command = args.shift().toLowerCase();
 
     switch (command) {
