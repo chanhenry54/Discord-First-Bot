@@ -12,9 +12,9 @@ client.on('message', msg => {
         msg.channel.send('Pong!');
     }
     // 'no u' interaction
-    if (msg.content.toLowerCase() === 'no u') {
-        msg.channel.send('No u');
-    }
+    //if (msg.content.toLowerCase() === 'no u') {
+    //  msg.channel.send('No u');
+    //}
 });
 
 client.login(process.env.BOT_TOKEN);
