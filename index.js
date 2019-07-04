@@ -1,67 +1,42 @@
 // startup declarations
-require('dotenv').config();
 const Discord = require('discord.js');
+const Enmap = require('enmap');
+const fs = require('fs');
+
 const client = new Discord.Client();
+const config = require('dotenv').config();
+client.config = config;
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on('message', msg => {
-    // ignore bot messages
-    if (msg.author.bot) { return; }
+// load events from /events folder
+fs.readdir('./events/', (err, files) => {
+    if (err) { return console.error(err); }
+    files.forEach(file => {
+        if (!file.endsWith('.js')) { return; }
+        const event = require(`./events/${file}`);
+        let eventName = file.split('.')[0];
 
-    // 'ping' interaction
-    if (msg.content.toLowerCase() === 'ping') {
-        msg.channel.send('Pong!');
-    }
+        client.on(eventName, event.bind(null, client));
+        delete require.cache[require.resolve(`./events/${file}`)];
+    });
+});
 
-    // 'no u' interaction
-    if (msg.content.toLowerCase() === 'no u') {
-        msg.channel.send('No u!');
-    }
+client.commands = new Enmap();
 
-    // 'owo' interaction
-    if (msg.content.toLowerCase() === 'owo') {
-        msg.channel.send('uwu');
-    }
+// store commands into Enmap data structure
+fs.readdir('./commands/', (err, files) => {
+    if (err) { return console.error(err); }
+    files.forEach(file => {
+        if (!file.endsWith('.js')) { return; }
+        let props = require(`./commands/${file}`);
+        let commandName = file.split('.')[0];
 
-    // 'uwu' interaction
-    if (msg.content.toLowerCase() === 'uwu') {
-        msg.channel.send('owo');
-    }
-
-    /*
-     * !hechan commands
-     */
-    if (!msg.content.startsWith(process.env.PREFIX)) { return; }
-    const args = msg.content.slice(process.env.PREFIX.length).trim().split(/ + /g);
-    const command = args.shift().toLowerCase();
-
-    switch (command) {
-        // help command
-        case 'help':
-            msg.author.send({
-                embed: {
-                    "color": 8838087,
-                    "fields": [
-                        {
-                            "name": "Hechan Commands",
-                            "value": "Here is a list of all available Hechan commands and parameters."
-                        },
-                        {
-                            "name": "!hechan help",
-                            "value": "Displays this help guide"
-                        }
-                    ]
-                }
-            });
-            break;
-        // unknown command
-        default:
-            msg.author.send(msg + ': invalid command!');
-            break;
-    }
+        console.log(`Attempting to load command ${commandName}`);
+        client.commands.set(commandName, props);
+    });
 });
 
 client.login(process.env.BOT_TOKEN);
