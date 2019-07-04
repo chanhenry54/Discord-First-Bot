@@ -28,9 +28,14 @@ module.exports = (client, msg) => {
     }
 
     // Parse command from msg
-    if (msg.content.indexOf(client.config.PREFIX) !== 0) { return; }
+    if (msg.content.indexOf(client.config.PREFIX) !== 0) {
+        msg.channel.send('oops');
+        return;
+    }
     const args = msg.content.slice(client.config.PREFIX.length).trim().split(/ + /g);
     const command = args.shift().toLowerCase();
+
+    msg.channel.send(command);
 
     // Grab command from Enmap, check if invalid
     const cmd = client.commands.get(command);
