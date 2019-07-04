@@ -8,6 +8,8 @@ Made by Henry Chan
 
 ## Changelog
 
+Version 1.2.0: Modularized code for readability and portability
+
 Version 1.1.0: Added more responses, !hechan commands
 
 Version 1.0.1: Added 'no u' response and Heroku deployment.
