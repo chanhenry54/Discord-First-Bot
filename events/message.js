@@ -28,11 +28,11 @@ module.exports = (client, msg) => {
     }
 
     // Parse command from msg
-    if (!msg.content.startsWith(client.config.PREFIX)) {
+    if (!msg.content.startsWith(process.env.PREFIX)) {
         msg.channel.send('oops');
         return;
     }
-    const args = msg.content.slice(client.config.PREFIX.length).trim().split(/ + /g);
+    const args = msg.content.slice(process.env.PREFIX.length).trim().split(/ + /g);
     const command = args.shift().toLowerCase();
 
     // Grab command from Enmap, check if invalid
