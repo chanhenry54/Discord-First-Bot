@@ -28,10 +28,7 @@ module.exports = (client, msg) => {
     }
 
     // Parse command from msg
-    if (!msg.content.startsWith(process.env.PREFIX)) {
-        msg.channel.send('oops');
-        return;
-    }
+    if (!msg.content.startsWith(process.env.PREFIX)) { return; }
     const args = msg.content.slice(process.env.PREFIX.length).trim().split(/ + /g);
     const command = args.shift().toLowerCase();
 
