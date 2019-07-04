@@ -1,6 +1,6 @@
 // help command module
 exports.run = (client, message, args) => {
-    msg.channel.send({
+    message.channel.send({
         embed: {
             "color": 8838087,
             "fields": [
