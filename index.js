@@ -1,6 +1,5 @@
 // startup declarations
 const Discord = require('discord.js');
-const Enmap = require('enmap');
 const fs = require('fs');
 
 const client = new Discord.Client();
@@ -24,9 +23,9 @@ fs.readdir('./events/', (err, files) => {
     });
 });
 
-client.commands = new Enmap();
+client.commands = new Map();
 
-// store commands into Enmap data structure
+// store commands into Map data structure
 fs.readdir('./commands/', (err, files) => {
     if (err) { return console.error(err); }
     files.forEach(file => {
