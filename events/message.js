@@ -32,7 +32,10 @@ module.exports = (client, msg) => {
     const args = msg.content.slice(process.env.PREFIX.length).trim().split(/ + /g);
     const command = args.shift().toLowerCase();
 
-    // Grab command from Enmap, check if invalid
+    // Grab command from Map, check if invalid
+    if (command === '') {
+        'help'.run(client, msg, args);
+    }
     const cmd = client.commands.get(command);
     if (!cmd) {
         msg.channel.send(msg + ': invalid command!');
