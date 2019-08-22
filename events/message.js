@@ -34,7 +34,8 @@ module.exports = (client, msg) => {
 
     // Grab command from Map, check if invalid
     if (command === '') {
-        'help'.run(client, msg, args);
+        client.commands.get('help').run(client, msg, args);
+        return;
     }
     const cmd = client.commands.get(command);
     if (!cmd) {
