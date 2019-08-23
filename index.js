@@ -1,9 +1,24 @@
 // startup declarations
 const Discord = require('discord.js');
 const fs = require('fs');
+const mongoose = require('mongoose');
+const players = require('./models/players.js');
 
 const client = new Discord.Client();
 require('dotenv').config();
+
+// connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/playerdb', { useNewUrlParser: true }, err => {
+    if (err) { return console.error(err); }
+    console.log('Connected to database');
+});
+
+process.on('SIGINT', function () {
+    mongoose.connection.close(function () {
+        console.log('Disconnected from database on bot shutdown');
+        process.exit();
+    });
+});
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
