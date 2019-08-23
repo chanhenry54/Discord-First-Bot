@@ -8,10 +8,10 @@ Made by Henry Chan
 
 ## Changelog
 
-Version 1.2.0: Modularized code for readability and portability
+07/03/19: Modularized code for readability and portability
 
-Version 1.1.0: Added more responses, !hechan commands
+06/27/19: Added more responses, !hechan commands
 
-Version 1.0.1: Added 'no u' response and Heroku deployment.
+06/26/19: Added 'no u' response and Heroku deployment.
 
-Version 1.0.0: Initial creation, bot is functional.
+06/24/19: Initial creation, bot is functional.
