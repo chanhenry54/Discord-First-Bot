@@ -1,5 +1,5 @@
 // message event module
-module.exports = (client, msg) => {
+module.exports = async (client, msg) => {
     // ignore bot messages
     if (msg.author.bot) { return; }
 
@@ -29,7 +29,7 @@ module.exports = (client, msg) => {
 
     // Parse command from msg
     if (!msg.content.startsWith(process.env.PREFIX)) { return; }
-    const args = msg.content.slice(process.env.PREFIX.length).trim().split(/ + /g);
+    const args = msg.content.slice(process.env.PREFIX.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
     // Grab command from Map, check if invalid
@@ -39,7 +39,7 @@ module.exports = (client, msg) => {
     }
     const cmd = client.commands.get(command);
     if (!cmd) {
-        msg.channel.send(msg + ': invalid command!');
+        msg.channel.send(`${msg}: invalid command!`);
         return;
     }
 
