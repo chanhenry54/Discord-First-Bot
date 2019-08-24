@@ -2,7 +2,6 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 const mongoose = require('mongoose');
-const players = require('./models/players.js');
 
 const client = new Discord.Client();
 require('dotenv').config();
