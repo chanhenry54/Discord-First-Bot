@@ -1,4 +1,31 @@
 // message event module
+const { Kayn, REGIONS } = require('kayn');
+
+// create new instance of Kayn library
+const kayn = Kayn(process.env.RIOT_API_KEY)({
+    region: REGIONS.NORTH_AMERICA,
+    locale: 'en_US',
+    debugOptions: {
+        isEnabled: true,
+        showKey: false
+    },
+    requestOptions: {
+        shouldRetry: true,
+        numberOfRetriesBeforeAbort: 3,
+        delayBeforeRetry: 1000,
+        burst: false,
+        shouldExitOn403: false
+    },
+    cacheOptions: {
+        cache: null,
+        timeToLives: {
+            useDefault: false,
+            byGroup: {},
+            byMethod: {}
+        }
+    }
+});
+
 module.exports = async (client, msg) => {
     // ignore bot messages
     if (msg.author.bot) { return; }
@@ -34,7 +61,7 @@ module.exports = async (client, msg) => {
 
     // Grab command from Map, check if invalid
     if (command === '') {
-        client.commands.get('help').run(client, msg, args);
+        client.commands.get('help').run(client, msg, args, kayn, REGIONS);
         return;
     }
     const cmd = client.commands.get(command);
@@ -44,5 +71,5 @@ module.exports = async (client, msg) => {
     }
 
     // Run command
-    cmd.run(client, msg, args);
+    cmd.run(client, msg, args, kayn, REGIONS);
 };
