@@ -2,9 +2,9 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 const client = new Discord.Client();
-require('dotenv').config();
 
 // connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/playerdb', { useNewUrlParser: true }, err => {
