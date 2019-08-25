@@ -2,7 +2,7 @@
 module.exports = {
     name: 'help',
     description: 'Shows list of available commands',
-    run(client, message, args) {
+    run(client, message, args, kayn, REGIONS) {
         message.channel.send({
             embed: {
                 "color": 8838087,
