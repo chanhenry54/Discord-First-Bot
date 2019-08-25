@@ -2,7 +2,7 @@
 
 Discord bot with basic features.
 
-Frameworks/Languages used: JavaScript, Discord.js, Node.js, Mongoose/MongoDB
+Technologies used: JavaScript, Discord.js, Node.js, Mongoose/MongoDB, Kayn library
 
 Made by Henry Chan
 
