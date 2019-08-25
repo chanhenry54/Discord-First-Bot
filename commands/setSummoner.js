@@ -3,8 +3,8 @@ const Discord = require('discord.js');
 const Summoner = require('../models/summonerSchema');
 
 module.exports = {
-    name: 'add',
-    description: 'Adds summoner to Discord user',
+    name: 'setSummoner',
+    description: 'Sets summoner for Discord user',
     usage: '[region] [summoner name]',
     run(client, message, args, kayn, REGIONS) {
         // parse region and summoner name
