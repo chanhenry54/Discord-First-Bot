@@ -9,11 +9,11 @@ module.exports = {
     run(client, message, args, kayn, REGIONS) {
         // parse region and summoner name
         if (args.length < 2) {
-            return message.channel.send('Missing region and/or summoner name');
+            return message.channel.send(`Missing region and/or summoner name: !hechan ${usage}`);
         }
         const region = args.shift().toLowerCase();
         if (!(Object.values(REGIONS).includes(region))) {
-            return message.channel.send(`${region} is not a valid region. Valid regions are: ${Object.values(REGIONS).join(', ').toUpperCase()}`);
+            return message.channel.send(`"${region}" is not a valid region. Valid regions are: ${Object.values(REGIONS).join(', ').toUpperCase()}`);
         }
         summonerName = args.join(' ');
 
@@ -50,7 +50,7 @@ module.exports = {
                 const embed = new Discord.RichEmbed()
                     .setAuthor(`Summoner: ${summoner.name} [${region.toUpperCase()}]`, `https://opgg-static.akamaized.net/images/profile_icons/profileIcon${summoner.profileIconId}.jpg`)
                     .setColor(0x86DBC7)
-                    .setDescription('This summoner is now linked to your user account!');
+                    .setDescription('This summoner is now linked to your user!');
                 return message.channel.send(embed);
             })
             .catch(err => {
