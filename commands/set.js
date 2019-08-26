@@ -9,7 +9,7 @@ module.exports = {
     run(client, message, args, kayn, REGIONS) {
         // parse region and summoner name
         if (args.length < 2) {
-            return message.channel.send(`Missing region and/or summoner name: !hechan ${usage}`);
+            return message.channel.send(`Missing region and/or summoner name: !hechan [region] [summoner name]`);
         }
         const region = args.shift().toLowerCase();
         if (!(Object.values(REGIONS).includes(region))) {
