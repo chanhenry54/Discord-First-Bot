@@ -13,7 +13,7 @@ module.exports = {
             if (args.length < 2) {
                 return message.channel.send('Missing region and/or summoner name: !hechan profile [region] [summoner]');
             } else {
-                const region = args.shift().toLowerCase();
+                region = args.shift().toLowerCase();
                 if (!(Object.values(REGIONS).includes(region))) {
                     return message.channel.send(`"${region}" is not a valid region. Valid regions are: ${Object.values(REGIONS).join(', ').toUpperCase()}`);
                 }
@@ -35,26 +35,21 @@ module.exports = {
         }
 
         // get summoner data
-        let pfp;
-        let level;
         kayn.Summoner.by.name(summonerName)
             .region(region)
             .then(summoner => {
-                pfp = summoner.profileIconId;
-                level = summoner.summonerLevel;
+                // output profile
+                const embed = new Discord.RichEmbed()
+                    .setAuthor(`Summoner Profile: ${summonerName} [${region.toUpperCase()}]`)
+                    .setThumbnail(`https://opgg-static.akamaized.net/images/profile_icons/profileIcon${summoner.profileIconId}.jpg`)
+                    .setColor(0x86DBC7)
+                    .setDescription(`Here is some information about ${summonerName} [${region.toUpperCase()}].`)
+                    .addField('Level', summoner.summonerLevel, true);
+                return message.channel.send(embed);
             })
             .catch(err => {
                 console.error(err);
                 return message.channel.send('Oops, an error occurred! Please try again!');
             });
-
-        // output profile
-        const embed = new Discord.RichEmbed()
-            .setAuthor(`Summoner Profile: ${summonerName} [${region.toUpperCase()}]`)
-            .setThumbnail(`https://opgg-static.akamaized.net/images/profile_icons/profileIcon${pfp}.jpg`)
-            .setColor(0x86DBC7)
-            .setDescription(`Here is some information about ${summonerName} [${region.toUpperCase()}].`)
-            .addField('Level', level, true);
-        return message.channel.send(embed);
     }
 };
