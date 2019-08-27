@@ -5,17 +5,17 @@ const Summoner = require('../models/summonerSchema');
 module.exports = {
     name: 'set',
     description: 'Sets/updates summoner for Discord user',
-    usage: '[region] [summoner name]',
+    usage: '!hechan set region summoner',
     run(client, message, args, kayn, REGIONS) {
         // parse region and summoner name
         if (args.length < 2) {
-            return message.channel.send(`Missing region and/or summoner name: !hechan [region] [summoner name]`);
+            return message.channel.send('Missing region and/or summoner name: !hechan set region summoner');
         }
         const region = args.shift().toLowerCase();
         if (!(Object.values(REGIONS).includes(region))) {
             return message.channel.send(`"${region}" is not a valid region. Valid regions are: ${Object.values(REGIONS).join(', ').toUpperCase()}`);
         }
-        summonerName = args.join(' ');
+        const summonerName = args.join(' ');
 
         kayn.Summoner.by.name(summonerName)
             .region(region)
@@ -30,7 +30,9 @@ module.exports = {
                         const newSummoner = new Summoner({
                             userID: message.author.id,
                             region: region,
-                            summName: summoner.name
+                            summName: summoner.name,
+                            accountID: summoner.accountID,
+                            summID: summoner.summonerID
                         });
                         newSummoner.save().catch(err => {
                             console.error(err);
@@ -39,6 +41,8 @@ module.exports = {
                     } else {
                         result.region = region;
                         result.summName = summoner.name;
+                        result.accountID = summoner.accountID;
+                        result.summID = summoner.summonerID;
                         result.save().catch(err => {
                             console.error(err);
                             return message.channel.send('Oops, an error has occurred! Please try again!');
