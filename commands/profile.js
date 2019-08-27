@@ -7,6 +7,25 @@ module.exports = {
     description: 'Shows the summoner profile for a particular user',
     usage: '!hechan profile [region] [summoner]',
     run(client, message, args, kayn, REGIONS) {
+        // helper function to output summoner profile
+        function outputProfile() {
+            kayn.Summoner.by.name(summonerName)
+                .region(region)
+                .then(summoner => {
+                    const embed = new Discord.RichEmbed()
+                        .setAuthor(`Summoner Profile: ${summonerName} [${region.toUpperCase()}]`)
+                        .setThumbnail(`https://opgg-static.akamaized.net/images/profile_icons/profileIcon${summoner.profileIconId}.jpg`)
+                        .setColor(0x86DBC7)
+                        .setDescription(`Here is some information about ${summonerName} [${region.toUpperCase()}].`)
+                        .addField('Level', summoner.summonerLevel, true);
+                    return message.channel.send(embed);
+                })
+                .catch(err => {
+                    console.error(err);
+                    return message.channel.send('Oops, an error occurred! Please try again!');
+                });
+        }
+
         let region;
         let summonerName;
         if (args.length > 0) { // if args are present
@@ -18,6 +37,7 @@ module.exports = {
                     return message.channel.send(`"${region}" is not a valid region. Valid regions are: ${Object.values(REGIONS).join(', ').toUpperCase()}`);
                 }
                 summonerName = args.join(' ');
+                outputProfile();
             }
         } else { // no args
             Summoner.findOne({ userID: message.author.id }, function (err, result) {
@@ -30,26 +50,9 @@ module.exports = {
                 } else {
                     region = result.region;
                     summonerName = result.summName;
+                    outputProfile();
                 }
             });
         }
-
-        // get summoner data
-        kayn.Summoner.by.name(summonerName)
-            .region(region)
-            .then(summoner => {
-                // output profile
-                const embed = new Discord.RichEmbed()
-                    .setAuthor(`Summoner Profile: ${summonerName} [${region.toUpperCase()}]`)
-                    .setThumbnail(`https://opgg-static.akamaized.net/images/profile_icons/profileIcon${summoner.profileIconId}.jpg`)
-                    .setColor(0x86DBC7)
-                    .setDescription(`Here is some information about ${summonerName} [${region.toUpperCase()}].`)
-                    .addField('Level', summoner.summonerLevel, true);
-                return message.channel.send(embed);
-            })
-            .catch(err => {
-                console.error(err);
-                return message.channel.send('Oops, an error occurred! Please try again!');
-            });
     }
 };
