@@ -7,7 +7,7 @@ require('dotenv').config();
 const client = new Discord.Client();
 
 // connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/playerdb', { useNewUrlParser: true }, err => {
+mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PWD}@ds253567.mlab.com:53567/heroku_6z2twk23`, { useNewUrlParser: true }, err => {
     if (err) { return console.error(err); }
     console.log('Connected to database');
 });
