@@ -31,8 +31,8 @@ module.exports = {
                             userID: message.author.id,
                             region: region,
                             summName: summoner.name,
-                            accountID: summoner.accountID,
-                            summID: summoner.summonerID
+                            accountID: summoner.accountId,
+                            summID: summoner.id
                         });
                         newSummoner.save().catch(err => {
                             console.error(err);
@@ -41,8 +41,8 @@ module.exports = {
                     } else {
                         result.region = region;
                         result.summName = summoner.name;
-                        result.accountID = summoner.accountID;
-                        result.summID = summoner.summonerID;
+                        result.accountID = summoner.accountId;
+                        result.summID = summoner.id;
                         result.save().catch(err => {
                             console.error(err);
                             return message.channel.send('Oops, an error has occurred! Please try again!');
