@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const Summoner = require('../models/summonerSchema');
 
 // helper function to process match data
-const processMatch = async (championIdMap, summonerId, match) => {
+const processMatch = (championIdMap, summonerId, match) => {
     const { participantId } = match.participantIdentities.find(pi => pi.player.summonerId === summonerId);
     const participant = match.participants.find(p => p.participantId === participantId);
     const champion = championIdMap.data[participant.championId];
@@ -62,6 +62,10 @@ module.exports = {
         // get match data
         const processor = match => processMatch(championIdMap, id, match);
         const results = await Promise.all(games.map(processor));
+        let numWins = 0;
+        results.forEach(result => { if (result.didWin) numWins++ });
+        let numLosses = numMatches - numWins;
+        let winPercent = Math.ceil((numWins / numMatches) * 100);
 
         // output profile to Discord
         const embed = new Discord.RichEmbed()
@@ -69,7 +73,8 @@ module.exports = {
             .setThumbnail(`https://opgg-static.akamaized.net/images/profile_icons/profileIcon${profileIconId}.jpg`)
             .setColor(0x86DBC7)
             .setDescription(`Here is some information about ${summonerName} [${region.toUpperCase()}].`)
-            .addField('Level', summonerLevel, true);
+            .addField('Level', summonerLevel, true)
+            .addField('Last 10 Games [All Queues]', `${numMatches}G ${numWins}W ${numLosses}L / ${winPercent}% WR`, true);
         // last 20 games, top champs, ranked stats, last played
         return message.channel.send(embed);
     }
