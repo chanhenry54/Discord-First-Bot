@@ -50,6 +50,8 @@ module.exports = {
             });
         }
 
+        message.channel.send('Gathering summoner data...');
+
         // prep for getting match data
         const championIdMap = await kayn.DDragon.Champion.listDataByIdWithParentAsId();
         const { id, accountId, profileIconId, summonerLevel } = await kayn.Summoner.by.name(summonerName).region(region);
