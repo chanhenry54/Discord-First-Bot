@@ -2,6 +2,17 @@
 const Discord = require('discord.js');
 const Summoner = require('../models/summonerSchema');
 
+const queues = {
+    400: 'SR Draft',
+    420: 'Ranked Solo/Duo',
+    430: 'SR Normal',
+    440: 'Ranked Flex',
+    450: 'ARAM',
+    830: 'Intro Bots',
+    840: 'Beginner Bots',
+    850: 'Intermediate Bots'
+};
+
 // helper function to process match data
 const processMatch = (championIdMap, summonerId, match) => {
     const { participantId } = match.participantIdentities.find(pi => pi.player.summonerId === summonerId);
@@ -13,7 +24,8 @@ const processMatch = (championIdMap, summonerId, match) => {
         championName: champion.name,
         kills: participant.stats.kills,
         deaths: participant.stats.deaths,
-        assists: participant.stats.assists
+        assists: participant.stats.assists,
+        queue: match.queueId
     }
 }
 
@@ -59,13 +71,18 @@ module.exports = {
         const gameIds = matches.slice(0, numMatches).map(({ gameId }) => gameId);
         const games = await Promise.all(gameIds.map(kayn.Match.get));
 
-        // get match data
+        // last 10 games data
         const processor = match => processMatch(championIdMap, id, match);
         const results = await Promise.all(games.map(processor));
         let numWins = 0;
         results.forEach(result => { if (result.didWin) numWins++ });
         let numLosses = numMatches - numWins;
         let winPercent = Math.ceil((numWins / numMatches) * 100);
+        let totalKillsAssists = results.map(result => result.kills + result.assists).reduce((acc, currTakedowns) => acc + currTakedowns, 0);
+        let totalDeaths = results.reduce((acc, currDeaths) => acc + currDeaths, 0);
+        let kda = (totalKillsAssists / totalDeaths).toFixed(2);
+
+        //  last game data
 
         // output profile to Discord
         const embed = new Discord.RichEmbed()
@@ -73,8 +90,9 @@ module.exports = {
             .setThumbnail(`https://opgg-static.akamaized.net/images/profile_icons/profileIcon${profileIconId}.jpg`)
             .setColor(0x86DBC7)
             .setDescription(`Here is some information about ${summonerName} [${region.toUpperCase()}].`)
-            .addField('Level', summonerLevel, true)
-            .addField('Last 10 Games [All Queues]', `${numMatches}G ${numWins}W ${numLosses}L / ${winPercent}% WR`, true);
+            .addField('Level:', summonerLevel, true)
+            .addField('Last 10 Games [All Queues]:', `${numMatches}G ${numWins}W ${numLosses}L / ${winPercent}% WR / ${kda}:1`, true)
+            .addField('Last Game Played:', ``, true);
         // last 20 games, top champs, ranked stats, last played
         return message.channel.send(embed);
     }
