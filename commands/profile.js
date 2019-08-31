@@ -29,6 +29,51 @@ const processMatch = (championIdMap, summonerId, match) => {
     }
 }
 
+const processLastMatch = match => {
+    let seconds = Math.floor((Date.now() - match.gameCreation) / 1000);
+    let intervalType;
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) {
+        intervalType = 'year';
+    } else {
+        interval = Math.floor(seconds / 2592000);
+        if (interval >= 1) {
+            intervalType = 'month';
+        } else {
+            interval = Math.floor(seconds / 86400);
+            if (interval >= 1) {
+                intervalType = 'day';
+            } else {
+                interval = Math.floor(seconds / 3600);
+                if (interval >= 1) {
+                    intervalType = 'hour';
+                } else {
+                    interval = Math.floor(seconds / 60);
+                    if (interval >= 1) {
+                        intervalType = 'minute';
+                    } else {
+                        interval = seconds;
+                        intervalType = 'second';
+                    }
+                }
+            }
+        }
+    }
+    if (interval > 1 || interval === 0) {
+        intervalType += 's';
+    }
+
+    return {
+        didWin: (match.didWin ? 'Win' : 'Loss'),
+        queue: queues[match.queue],
+        champion: match.championName,
+        kills: match.kills,
+        deaths: match.deaths,
+        assists: match.assists,
+        whenPlayed: `${interval} ${intervalType} ago`
+    }
+};
+
 module.exports = {
     name: 'profile',
     description: 'Shows the summoner profile for a particular user',
@@ -83,6 +128,7 @@ module.exports = {
         let kda = (totalKillsAssists / totalDeaths).toFixed(2);
 
         //  last game data
+        let lastMatch = processLastMatch(results[0]);
 
         // output profile to Discord
         const embed = new Discord.RichEmbed()
@@ -92,7 +138,7 @@ module.exports = {
             .setDescription(`Here is some information about ${summonerName} [${region.toUpperCase()}].`)
             .addField('Level:', summonerLevel, true)
             .addField('Last 10 Games [All Queues]:', `${numMatches}G ${numWins}W ${numLosses}L / ${winPercent}% WR / ${kda}:1`, true)
-            .addField('Last Game Played:', ``, true);
+            .addField('Last Game Played:', `**[${lastMatch.didWin}] ${lastMatch.queue}** game as **${lastMatch.champion}** with **${lastMatch.kills}/${lastMatch.deaths}/${lastMatch.assists}**, ${lastMatch.whenPlayed}.`);
         // last 20 games, top champs, ranked stats, last played
         return message.channel.send(embed);
     }
