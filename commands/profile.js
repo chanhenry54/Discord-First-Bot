@@ -29,6 +29,14 @@ const processMatch = (championIdMap, summonerId, match) => {
     }
 }
 
+const processChamp = (championIdMap, champ) => {
+    return {
+        name: championIdMap.data[champ.championId],
+        level: champ.championLevel,
+        points: champ.championPoints
+    }
+};
+
 const processLastMatch = match => {
     let seconds = Math.floor((Date.now() - match.gameCreation) / 1000);
     let intervalType;
@@ -127,7 +135,14 @@ module.exports = {
         let totalDeaths = results.reduce((acc, currDeaths) => acc + currDeaths, 0);
         let kda = (totalKillsAssists / totalDeaths).toFixed(2);
 
-        //  last game data
+        // top champs data
+        const totalScore = await kayn.ChampionMastery.totalScore(id);
+        const listOfChamps = await kayn.ChampionMastery.list(id);
+        const topThree = listOfChamps.slice(0, 3);
+        const champProcessor = champ => processChamp(championIdMap, champ);
+        const topData = await Promise.all(topThree.map(champProcessor));
+
+        // last game data
         let lastMatch = processLastMatch(results[0]);
 
         // output profile to Discord
@@ -136,8 +151,9 @@ module.exports = {
             .setThumbnail(`https://opgg-static.akamaized.net/images/profile_icons/profileIcon${profileIconId}.jpg`)
             .setColor(0x86DBC7)
             .setDescription(`Here is some information about ${summonerName} [${region.toUpperCase()}].`)
-            .addField('Level:', summonerLevel, true)
+            .addField('Level/Total Mastery Score:', `${summonerLevel} / ${totalScore}`, true)
             .addField('Last 10 Games [All Queues]:', `${numMatches}G ${numWins}W ${numLosses}L / ${winPercent}% WR / ${kda}:1`, true)
+            .addField('Most Played Champions:', `1. ${topData[0].name}: ${topData[0].points} **[${topData[0].level}]**\n2. ${topData[1].name}: ${topData[1].points} **[${topData[1].level}]**\n3. ${topData[2].name}: ${topData[2].points} **[${topData[2].level}]**`)
             .addField('Last Game Played:', `**[${lastMatch.didWin}] ${lastMatch.queue}** game as **${lastMatch.champion}** with **${lastMatch.kills}/${lastMatch.deaths}/${lastMatch.assists}**, ${lastMatch.whenPlayed}.`);
         // last 20 games, top champs, ranked stats, last played
         return message.channel.send(embed);
