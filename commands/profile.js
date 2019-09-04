@@ -31,7 +31,7 @@ const processMatch = (championIdMap, summonerId, match) => {
 
 const processChamp = (championIdMap, champ) => {
     return {
-        name: championIdMap.data[champ.championId],
+        name: championIdMap.data[champ.championId].name,
         level: champ.championLevel,
         points: champ.championPoints
     }
