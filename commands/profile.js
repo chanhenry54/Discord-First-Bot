@@ -131,9 +131,14 @@ module.exports = {
         results.forEach(result => { if (result.didWin) numWins++ });
         let numLosses = numMatches - numWins;
         let winPercent = Math.ceil((numWins / numMatches) * 100);
-        let totalKillsAssists = results.map(result => result.kills + result.assists).reduce((acc, currTakedowns) => acc + currTakedowns, 0);
+        let totalKills = results.reduce(function (a, b) {
+            return { kills: a.kills + b.kills };
+        }, 0);
+        let totalAssists = results.reduce(function (a, b) {
+            return { assists: a.assists + b.assists };
+        }, 0);
         let totalDeaths = results.reduce((acc, currDeaths) => acc + currDeaths, 0);
-        let kda = (totalKillsAssists / totalDeaths).toFixed(2);
+        let kda = ((totalKills + totalAssists) / totalDeaths).toFixed(2);
 
         // top champs data
         const totalScore = await kayn.ChampionMastery.totalScore(id);
