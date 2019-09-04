@@ -132,12 +132,14 @@ module.exports = {
         let numLosses = numMatches - numWins;
         let winPercent = Math.ceil((numWins / numMatches) * 100);
         let totalKills = results.reduce(function (a, b) {
-            return { kills: a.kills + b.kills };
+            return a + b.kills;
         }, 0);
         let totalAssists = results.reduce(function (a, b) {
-            return { assists: a.assists + b.assists };
+            return a + b.assists;
         }, 0);
-        let totalDeaths = results.reduce((acc, currDeaths) => acc + currDeaths, 0);
+        let totalDeaths = results.reduce(function (a, b) {
+            return a + b.deaths;
+        }, 0);
         let kda = ((totalKills + totalAssists) / totalDeaths).toFixed(2);
 
         // top champs data
