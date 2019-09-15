@@ -161,7 +161,7 @@ module.exports = {
         const topData = await Promise.all(topThree.map(champProcessor));
 
         // ranked data
-        const rankedStats = await kayn.LeaguePositions.by.summonerID(id);
+        const rankedStats = await kayn.League.Entries.by.summonerID(id);
         const ranked = processRanked(rankedStats);
 
         // last game data
