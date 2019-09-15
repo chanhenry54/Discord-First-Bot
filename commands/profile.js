@@ -85,9 +85,9 @@ const processLastMatch = match => {
 const processRanked = list => {
     for (let i = 0; i < list.length; i++) {
         if (list[i].queueType === 'RANKED_SOLO_5x5') {
-            const numMatches = list.wins + list.losses;
-            const rate = Math.ceil((list.wins / numMatches) * 100);
-            return `**${list.tier} ${list.rank}**\n${list.leaguePoints} LP / ${list.wins}W ${list.losses}L\nWR: ${rate}%`;
+            const numMatches = list[i].wins + list[i].losses;
+            const rate = Math.ceil((list[i].wins / numMatches) * 100);
+            return `**${list[i].tier} ${list[i].rank}**\n${list[i].leaguePoints} LP / ${list[i].wins}W ${list[i].losses}L\nWR: ${rate}%`;
         }
     }
     return '**Unranked**';
@@ -175,7 +175,7 @@ module.exports = {
             .setDescription(`Here is some information about ${summonerName} [${region.toUpperCase()}].`)
             .addField('Level/Total Mastery Score:', `${summonerLevel} / ${totalScore}`, true)
             .addField('Last 10 Games [All Queues]:', `${numMatches}G ${numWins}W ${numLosses}L / ${winPercent}% WR / ${kda}:1`, true)
-            .addField('Most Played Champions:', `1. ${topData[0].name}: ${topData[0].points} **[${topData[0].level}]**\n2. ${topData[1].name}: ${topData[1].points} **[${topData[1].level}]**\n3. ${topData[2].name}: ${topData[2].points} **[${topData[2].level}]**`)
+            .addField('Most Played Champions:', `1. ${topData[0].name}: ${topData[0].points} **[${topData[0].level}]**\n2. ${topData[1].name}: ${topData[1].points} **[${topData[1].level}]**\n3. ${topData[2].name}: ${topData[2].points} **[${topData[2].level}]**`, true)
             .addField('Ranked Stats [Solo/Duo]:', ranked, true)
             .addField('Last Game Played:', `**[${lastMatch.didWin}] ${lastMatch.queue}** game as **${lastMatch.champion}** with **${lastMatch.kills}/${lastMatch.deaths}/${lastMatch.assists}**, ${lastMatch.whenPlayed}.`);
         // last 20 games, top champs, ranked stats, last played
