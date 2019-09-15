@@ -30,10 +30,20 @@ const processMatch = (championIdMap, summonerId, match) => {
 }
 
 const processChamp = (championIdMap, champ) => {
+    let champName, champLevel, champPoints;
+    if (champ === null) {
+        champName = 'None';
+        champLevel = 0;
+        champPoints = '';
+    } else {
+        champName = championIdMap.data[champ.championId].name;
+        champLevel = champ.championLevel;
+        champPoints = champ.championPoints;
+    }
     return {
-        name: championIdMap.data[champ.championId].name,
-        level: champ.championLevel,
-        points: champ.championPoints
+        name: champName,
+        level: champLevel,
+        points: champPoints
     };
 };
 
@@ -98,7 +108,7 @@ module.exports = {
     description: 'Shows the summoner profile for a particular user',
     usage: '!hechan profile [region] [summoner]',
     async run(client, message, args, kayn, REGIONS) {
-        const numMatches = 10;
+        let numMatches = 10;
         let region;
         let summonerName;
         if (args.length > 0) { // if args are present
@@ -131,41 +141,71 @@ module.exports = {
         // prep for getting match data
         const championIdMap = await kayn.DDragon.Champion.listDataByIdWithParentAsId();
         const { id, accountId, profileIconId, summonerLevel } = await kayn.Summoner.by.name(summonerName).region(region);
-        const { matches } = await kayn.Matchlist.by.accountID(accountId);
-        const gameIds = matches.slice(0, numMatches).map(({ gameId }) => gameId);
-        const games = await Promise.all(gameIds.map(kayn.Match.get));
+        let matches;
+        await kayn.Matchlist.by.accountID(accountId)
+            .then(dto => {
+                matches = dto.matches;
+            })
+            .catch(err => {
+                matches = null;
+            });
 
-        // last 10 games data
-        const processor = match => processMatch(championIdMap, id, match);
-        const results = await Promise.all(games.map(processor));
-        let numWins = 0;
-        results.forEach(result => { if (result.didWin) numWins++ });
-        const numLosses = numMatches - numWins;
-        const winPercent = Math.ceil((numWins / numMatches) * 100);
-        const totalKills = results.reduce(function (a, b) {
-            return a + b.kills;
-        }, 0);
-        const totalAssists = results.reduce(function (a, b) {
-            return a + b.assists;
-        }, 0);
-        const totalDeaths = results.reduce(function (a, b) {
-            return a + b.deaths;
-        }, 0);
-        const kda = ((totalKills + totalAssists) / totalDeaths).toFixed(2);
+        let numWins;
+        let numLosses;
+        let winPercent;
+        let kda;
+        let lastMatchOutput;
+        if (matches === null) { // check if no match history
+            numMatches = 0;
+            numWins = 0;
+            numLosses = 0;
+            winPercent = 0;
+            kda = 0;
+            kda = kda.toFixed(2);
+            lastMatchOutput = 'None';
+        } else {
+            const gameIds = matches.slice(0, numMatches).map(({ gameId }) => gameId);
+            const games = await Promise.all(gameIds.map(kayn.Match.get));
+
+            // last 10 games data
+            const processor = match => processMatch(championIdMap, id, match);
+            const results = await Promise.all(games.map(processor));
+            numWins = 0;
+            results.forEach(result => { if (result.didWin) numWins++ });
+            numLosses = numMatches - numWins;
+            winPercent = Math.ceil((numWins / numMatches) * 100);
+            const totalKills = results.reduce(function (a, b) {
+                return a + b.kills;
+            }, 0);
+            const totalAssists = results.reduce(function (a, b) {
+                return a + b.assists;
+            }, 0);
+            const totalDeaths = results.reduce(function (a, b) {
+                return a + b.deaths;
+            }, 0);
+            kda = ((totalKills + totalAssists) / totalDeaths).toFixed(2);
+
+            // last game data
+            const lastMatch = processLastMatch(results[0]);
+            lastMatchOutput = `**[${lastMatch.didWin}] ${lastMatch.queue}** game as **${lastMatch.champion}** with **${lastMatch.kills}/${lastMatch.deaths}/${lastMatch.assists}**, ${lastMatch.whenPlayed}.`;
+        }
 
         // top champs data
         const totalScore = await kayn.ChampionMastery.totalScore(id);
         const listOfChamps = await kayn.ChampionMastery.list(id);
         const topThree = listOfChamps.slice(0, 3);
-        const champProcessor = champ => processChamp(championIdMap, champ);
-        const topData = await Promise.all(topThree.map(champProcessor));
+        let topData = [];
+        for (let i = 0; i < 3; i++) {
+            if (typeof topThree[i] !== 'undefined') {
+                topData.push(processChamp(championIdMap, topThree[i]));
+            } else {
+                topData.push(processChamp(championIdMap, null));
+            }
+        }
 
         // ranked data
         const rankedStats = await kayn.League.Entries.by.summonerID(id);
         const ranked = processRanked(rankedStats);
-
-        // last game data
-        const lastMatch = processLastMatch(results[0]);
 
         // output profile to Discord
         const embed = new Discord.RichEmbed()
@@ -175,9 +215,9 @@ module.exports = {
             .setDescription(`Here is some information about ${summonerName} [${region.toUpperCase()}].`)
             .addField('Level/Total Mastery Score:', `${summonerLevel} / ${totalScore}`, true)
             .addField('Last 10 Games [All Queues]:', `${numMatches}G ${numWins}W ${numLosses}L / ${winPercent}% WR / ${kda}:1`, true)
-            .addField('Most Played Champions:', `1. ${topData[0].name}: ${topData[0].points} **[${topData[0].level}]**\n2. ${topData[1].name}: ${topData[1].points} **[${topData[1].level}]**\n3. ${topData[2].name}: ${topData[2].points} **[${topData[2].level}]**`, true)
+            .addField('Most Played Champions:', `1. ${topData[0].name}: ${topData[0].points} [Lv. ${topData[0].level}]\n2. ${topData[1].name}: ${topData[1].points} [Lv. ${topData[1].level}]\n3. ${topData[2].name}: ${topData[2].points} [Lv. ${topData[2].level}]`, true)
             .addField('Ranked Stats [Solo/Duo]:', ranked, true)
-            .addField('Last Game Played:', `**[${lastMatch.didWin}] ${lastMatch.queue}** game as **${lastMatch.champion}** with **${lastMatch.kills}/${lastMatch.deaths}/${lastMatch.assists}**, ${lastMatch.whenPlayed}.`);
+            .addField('Last Game Played:', lastMatchOutput);
         // last 20 games, top champs, ranked stats, last played
         return message.channel.send(embed);
     }
