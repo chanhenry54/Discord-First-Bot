@@ -26,7 +26,7 @@ const processMatch = (championIdMap, summonerId, match) => {
         deaths: participant.stats.deaths,
         assists: participant.stats.assists,
         queue: match.queueId
-    }
+    };
 }
 
 const processChamp = (championIdMap, champ) => {
@@ -34,11 +34,11 @@ const processChamp = (championIdMap, champ) => {
         name: championIdMap.data[champ.championId].name,
         level: champ.championLevel,
         points: champ.championPoints
-    }
+    };
 };
 
 const processLastMatch = match => {
-    let seconds = Math.floor((Date.now() - match.gameCreation) / 1000);
+    const seconds = Math.floor((Date.now() - match.gameCreation) / 1000);
     let intervalType;
     let interval = Math.floor(seconds / 31536000);
     if (interval >= 1) {
@@ -79,7 +79,18 @@ const processLastMatch = match => {
         deaths: match.deaths,
         assists: match.assists,
         whenPlayed: `${interval} ${intervalType} ago`
+    };
+};
+
+const processRanked = list => {
+    for (let i = 0; i < list.length; i++) {
+        if (list[i].queueType === 'RANKED_SOLO_5x5') {
+            const numMatches = list.wins + list.losses;
+            const rate = Math.ceil((list.wins / numMatches) * 100);
+            return `**${list.tier} ${list.rank}**\n${list.leaguePoints} LP / ${list.wins}W ${list.losses}L\nWR: ${rate}%`;
+        }
     }
+    return '**Unranked**';
 };
 
 module.exports = {
@@ -129,18 +140,18 @@ module.exports = {
         const results = await Promise.all(games.map(processor));
         let numWins = 0;
         results.forEach(result => { if (result.didWin) numWins++ });
-        let numLosses = numMatches - numWins;
-        let winPercent = Math.ceil((numWins / numMatches) * 100);
-        let totalKills = results.reduce(function (a, b) {
+        const numLosses = numMatches - numWins;
+        const winPercent = Math.ceil((numWins / numMatches) * 100);
+        const totalKills = results.reduce(function (a, b) {
             return a + b.kills;
         }, 0);
-        let totalAssists = results.reduce(function (a, b) {
+        const totalAssists = results.reduce(function (a, b) {
             return a + b.assists;
         }, 0);
-        let totalDeaths = results.reduce(function (a, b) {
+        const totalDeaths = results.reduce(function (a, b) {
             return a + b.deaths;
         }, 0);
-        let kda = ((totalKills + totalAssists) / totalDeaths).toFixed(2);
+        const kda = ((totalKills + totalAssists) / totalDeaths).toFixed(2);
 
         // top champs data
         const totalScore = await kayn.ChampionMastery.totalScore(id);
@@ -149,8 +160,12 @@ module.exports = {
         const champProcessor = champ => processChamp(championIdMap, champ);
         const topData = await Promise.all(topThree.map(champProcessor));
 
+        // ranked data
+        const rankedStats = await kayn.LeaguePositions.by.summonerID(id);
+        const ranked = processRanked(rankedStats);
+
         // last game data
-        let lastMatch = processLastMatch(results[0]);
+        const lastMatch = processLastMatch(results[0]);
 
         // output profile to Discord
         const embed = new Discord.RichEmbed()
@@ -161,6 +176,7 @@ module.exports = {
             .addField('Level/Total Mastery Score:', `${summonerLevel} / ${totalScore}`, true)
             .addField('Last 10 Games [All Queues]:', `${numMatches}G ${numWins}W ${numLosses}L / ${winPercent}% WR / ${kda}:1`, true)
             .addField('Most Played Champions:', `1. ${topData[0].name}: ${topData[0].points} **[${topData[0].level}]**\n2. ${topData[1].name}: ${topData[1].points} **[${topData[1].level}]**\n3. ${topData[2].name}: ${topData[2].points} **[${topData[2].level}]**`)
+            .addField('Ranked Stats [Solo/Duo]:', ranked, true)
             .addField('Last Game Played:', `**[${lastMatch.didWin}] ${lastMatch.queue}** game as **${lastMatch.champion}** with **${lastMatch.kills}/${lastMatch.deaths}/${lastMatch.assists}**, ${lastMatch.whenPlayed}.`);
         // last 20 games, top champs, ranked stats, last played
         return message.channel.send(embed);
